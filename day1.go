@@ -27,7 +27,7 @@ func readLeftRight(input string) ([]int, []int) {
 	return l, r
 }
 
-func (*Method) Day1Part1(input string) string {
+func (*PuzzleSolver) Day1Part1(input string) string {
 	l, r := readLeftRight(input)
 
 	sort.Ints(l)
@@ -45,7 +45,7 @@ func (*Method) Day1Part1(input string) string {
 	return strconv.Itoa(sum)
 }
 
-func (*Method) Day1Part2(input string) string {
+func (*PuzzleSolver) Day1Part2(input string) string {
 	l, r := readLeftRight(input)
 
 	sum := 0

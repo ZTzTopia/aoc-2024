@@ -22,7 +22,7 @@ func getAllMultiplications(input string) int {
 			log.Fatal(err)
 		}
 
-		y, _ := strconv.Atoi(match[2])
+		y, err := strconv.Atoi(match[2])
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -33,12 +33,12 @@ func getAllMultiplications(input string) int {
 	return sum
 }
 
-func (*Method) Day3Part1(input string) string {
+func (*PuzzleSolver) Day3Part1(input string) string {
 	sum := getAllMultiplications(input)
 	return strconv.Itoa(sum)
 }
 
-func (*Method) Day3Part2(input string) string {
+func (*PuzzleSolver) Day3Part2(input string) string {
 	parts := strings.Split(input, "don't()")
 	var doMultiplications string
 

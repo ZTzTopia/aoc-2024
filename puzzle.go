@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-type Method struct {
+type PuzzleSolver struct {
 }
 
 type Puzzle struct {
@@ -16,77 +16,90 @@ type Puzzle struct {
 	Solve func(input string) string
 }
 
-func findPuzzles(puzzles []Puzzle, day int) (p1, p2 *Puzzle) {
-	for _, p := range puzzles {
-		if p.Day == day {
-			if p.Part == 1 {
-				p1 = &p
-			} else if p.Part == 2 {
-				p2 = &p
+func findPuzzles(puzzles []Puzzle, day int) (part1, part2 *Puzzle) {
+	for _, puzzle := range puzzles {
+		if puzzle.Day == day {
+			if puzzle.Part == 1 {
+				part1 = &puzzle
+			} else if puzzle.Part == 2 {
+				part2 = &puzzle
 			}
 		}
 	}
 	return
 }
 
-func findLastPuzzlePart(puzzles []Puzzle, day int) *Puzzle {
-	p1, p2 := findPuzzles(puzzles, day)
-	if p2 != nil {
-		return p2
+func findPuzzlePart(puzzles []Puzzle, day, part int) *Puzzle {
+	part1, part2 := findPuzzles(puzzles, day)
+	if part == 1 {
+		return part1
+	} else if part == 2 {
+		return part2
 	}
-	return p1
+
+	return nil
+}
+
+func findLastPuzzlePart(puzzles []Puzzle, day int) *Puzzle {
+	part1, part2 := findPuzzles(puzzles, day)
+	if part2 != nil {
+		return part2
+	}
+
+	return part1
 }
 
 func extractPuzzleNumbers(input string) (int, int, error) {
 	re := regexp.MustCompile(`Day(\d+)Part(\d+)`)
-
 	matches := re.FindStringSubmatch(input)
+
 	if matches == nil {
-		return 0, 0, fmt.Errorf("no matches found")
+		return 0, 0, fmt.Errorf("no matches found in input: %s", input)
 	}
 
-	d, err := strconv.Atoi(matches[1])
+	day, err := strconv.Atoi(matches[1])
 	if err != nil {
 		return 0, 0, err
 	}
 
-	p, err := strconv.Atoi(matches[2])
+	part, err := strconv.Atoi(matches[2])
 	if err != nil {
 		return 0, 0, err
 	}
 
-	return d, p, nil
+	return day, part, nil
 }
 
 func loadPuzzles() ([]Puzzle, int) {
 	var puzzles []Puzzle
 	var lastDay int
 
-	pst := &Method{}
-	pt := reflect.TypeOf(pst)
+	solver := &PuzzleSolver{}
+	solverType := reflect.TypeOf(solver)
 
-	for i := 0; i < pt.NumMethod(); i++ {
-		m := pt.Method(i)
-		d, p, err := extractPuzzleNumbers(m.Name)
+	for i := 0; i < solverType.NumMethod(); i++ {
+		method := solverType.Method(i)
+
+		day, part, err := extractPuzzleNumbers(method.Name)
 		if err != nil {
 			continue
 		}
 
 		puzzles = append(puzzles, Puzzle{
-			Day:  d,
-			Part: p,
-			Solve: func(s string) string {
+			Day:  day,
+			Part: part,
+			Solve: func(input string) string {
 				args := []reflect.Value{
-					reflect.ValueOf(pst),
-					reflect.ValueOf(s),
+					reflect.ValueOf(solver),
+					reflect.ValueOf(input),
 				}
-				res := m.Func.Call(args)[0]
-				return res.String()
+				results := method.Func.Call(args)
+				return results[0].String()
 			},
 		})
 
-		if d > lastDay {
-			lastDay = d
+		if day > lastDay {
+			lastDay = day
 		}
 	}
 

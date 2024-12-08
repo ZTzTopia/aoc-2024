@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func processUpdates(input string, checkSorted bool) string {
+func processUpdates(input string, checkSorted bool) int {
 	parts := strings.Split(input, "\n\n")
 
 	rulesSections := strings.Split(parts[0], "\n")
@@ -51,13 +51,13 @@ func processUpdates(input string, checkSorted bool) string {
 		}
 	}
 
-	return strconv.Itoa(sum)
+	return sum
 }
 
 func (*PuzzleSolver) Day5Part1(input string) string {
-	return processUpdates(input, true)
+	return strconv.Itoa(processUpdates(input, true))
 }
 
 func (*PuzzleSolver) Day5Part2(input string) string {
-	return processUpdates(input, false)
+	return strconv.Itoa(processUpdates(input, false))
 }

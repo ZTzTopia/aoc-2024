@@ -5,9 +5,7 @@ import (
 	"strings"
 )
 
-const Word = "XMAS"
-const WordLength = len(Word)
-
+var word = []rune{'X', 'M', 'A', 'S'}
 var directions = []struct{ dx, dy int }{
 	{0, 1},   // right
 	{1, 0},   // down
@@ -18,27 +16,27 @@ var directions = []struct{ dx, dy int }{
 	{-1, -1}, // up-left
 	{-1, 1},  // up-right
 }
+var diagonalDirections = []struct{ dx, dy int }{
+	{1, 1},   // down-right
+	{1, -1},  // down-left
+	{-1, -1}, // up-left
+	{-1, 1},  // up-right
+}
 
-func getGridElement(grids []string, x, y int) (rune, bool) {
+func getGridElement(grids []string, x, y int) rune {
 	if x < 0 || x >= len(grids) || y < 0 || y >= len(grids[x]) {
-		return 0, false
+		return 0
 	}
-	return rune(grids[x][y]), true
+	return rune(grids[x][y])
 }
 
 func countWordOccurrences(grids []string, x, y int) int {
 	count := 0
 	for _, direction := range directions {
 		matched := true
-		for i := 0; i < WordLength; i++ {
+		for i := 0; i < len(word); i++ {
 			nx, ny := x+i*direction.dx, y+i*direction.dy
-			element, ok := getGridElement(grids, nx, ny)
-			if !ok {
-				matched = false
-				break
-			}
-
-			if element != rune(Word[i]) {
+			if getGridElement(grids, nx, ny) != rune(word[i]) {
 				matched = false
 				break
 			}
@@ -52,7 +50,39 @@ func countWordOccurrences(grids []string, x, y int) int {
 	return count
 }
 
-func (*Method) Day4Part1(input string) string {
+func getDiagonalElementFromA(grids []string, x, y, dir int) rune {
+	nx, ny := x+1*diagonalDirections[dir].dx, y+1*diagonalDirections[dir].dy
+	switch getGridElement(grids, nx, ny) {
+	case rune('M'):
+		return 1
+	case rune('S'):
+		return 2
+	default:
+		return -1
+	}
+}
+
+func isSpecialXMas(grids []string, x, y int) bool {
+	if getGridElement(grids, x, y) != rune('A') {
+		return false
+	}
+
+	upLeft := getDiagonalElementFromA(grids, x, y, 0)
+	downRight := getDiagonalElementFromA(grids, x, y, 2)
+	if upLeft == -1 || downRight == -1 || upLeft == downRight {
+		return false
+	}
+
+	upRight := getDiagonalElementFromA(grids, x, y, 1)
+	downLeft := getDiagonalElementFromA(grids, x, y, 3)
+	if upRight == -1 || downLeft == -1 || upRight == downLeft {
+		return false
+	}
+
+	return true
+}
+
+func (*PuzzleSolver) Day4Part1(input string) string {
 	grids := strings.Split(input, "\n")
 	totalOccurrences := 0
 
@@ -65,46 +95,10 @@ func (*Method) Day4Part1(input string) string {
 	return strconv.Itoa(totalOccurrences)
 }
 
-// Best code ever right?
-func foo(grids []string, x, y, dir int) (bool, string) {
-	nx, ny := x+1*directions[dir].dx, y+1*directions[dir].dy
-	if nx < 0 || nx >= len(grids) {
-		return false, ""
-	}
-
-	if ny < 0 || ny >= len(grids[nx]) {
-		return false, ""
-	}
-
-	if grids[nx][ny] != 'S' && grids[nx][ny] != 'M' {
-		return false, ""
-	}
-
-	return true, string(grids[nx][ny])
-}
-
-func isSpecialXMas(grids []string, x, y int) bool {
-	if grids[x][y] != 'A' {
-		return false
-	}
-
-	upLeft, upLeftS := foo(grids, x, y, 6)
-	downRight, downRightS := foo(grids, x, y, 2)
-	if upLeft && downRight && upLeftS != downRightS {
-		upRight, upRightS := foo(grids, x, y, 7)
-		downLeft, downLeftS := foo(grids, x, y, 3)
-		if upRight && downLeft && upRightS != downLeftS {
-			return true
-		}
-	}
-
-	return false
-}
-
-func (*Method) Day4Part2(input string) string {
+func (*PuzzleSolver) Day4Part2(input string) string {
 	grids := strings.Split(input, "\n")
 
-	var totalOccurrences int
+	totalOccurrences := 0
 	for x := 0; x < len(grids); x++ {
 		for y := 0; y < len(grids[x]); y++ {
 			if isSpecialXMas(grids, x, y) {

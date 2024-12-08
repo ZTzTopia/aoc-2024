@@ -52,7 +52,7 @@ func isReportSafeReduced(levels []string) bool {
 	return false
 }
 
-func (*Method) Day2Part1(input string) string {
+func (*PuzzleSolver) Day2Part1(input string) string {
 	reports := strings.Split(input, "\n")
 
 	totalSafeReport := 0
@@ -66,7 +66,7 @@ func (*Method) Day2Part1(input string) string {
 	return strconv.Itoa(totalSafeReport)
 }
 
-func (*Method) Day2Part2(input string) string {
+func (*PuzzleSolver) Day2Part2(input string) string {
 	reports := strings.Split(input, "\n")
 
 	var totalSafeReport int

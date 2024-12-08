@@ -8,31 +8,48 @@ import (
 )
 
 func main() {
-    puzzles, lastDay := loadPuzzles()
+	puzzles, lastDay := loadPuzzles()
 
+	var puzzle *Puzzle
 	if os.Getenv("ASK_DAY_AND_PART") == "1" {
 		var day int
-		fmt.Print("Enter day: ")
-		_, err := fmt.Scanf("%d", &day)
-		if err != nil {
+		var part int
+
+		fmt.Print("Day: ")
+		if _, err := fmt.Scan(&day); err != nil {
 			log.Fatal(err)
 		}
 
-		var part int
-		fmt.Print("Enter part: ")
-		_, err = fmt.Scanf("%d", &part)
-		if err != nil {
+		fmt.Print("Part: ")
+		if _, err := fmt.Scan(&part); err != nil {
 			log.Fatal(err)
 		}
+
+		puzzle = findPuzzlePart(puzzles, day, part)
+		if puzzle == nil {
+			fmt.Printf("Puzzle for day %d part %d not found\n", day, part)
+			fmt.Println("Available puzzles: ")
+			for _, p := range puzzles {
+				fmt.Printf("\t- %d.%d\n", p.Day, p.Part)
+			}
+
+			fmt.Println("Using the last puzzle instead")
+			puzzle = findLastPuzzlePart(puzzles, lastDay)
+		}
+
+		fmt.Println()
+	} else {
+		puzzle = findLastPuzzlePart(puzzles, lastDay)
 	}
 
-	input, err := os.ReadFile(fmt.Sprintf("input/day%d.txt", lastDay))
-    if err != nil {
-        log.Fatal(err)
-    }
+	fmt.Printf("Day %d, Part %d\n", puzzle.Day, puzzle.Part)
+
+	input, err := os.ReadFile(fmt.Sprintf("input/day%d.txt", puzzle.Day))
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	t := time.Now()
-	p := findLastPuzzlePart(puzzles, lastDay)
-	fmt.Println("Result:", p.Solve(string(input)))
+	fmt.Println("Result:", puzzle.Solve(string(input)))
 	fmt.Println("Elapsed time:", time.Since(t))
 }
