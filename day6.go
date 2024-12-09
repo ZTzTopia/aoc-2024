@@ -110,12 +110,12 @@ func (*PuzzleSolver) Day6Part2(input string) string {
 	grids := strings.Split(input, "\n")
 	visited := moveGuard(grids)
 
-	paradoxOccurrence := 0
+	paradoxOccurrences := 0
 	for visitedPoint := range visited {
 		if testParadox(grids, visitedPoint) {
-			paradoxOccurrence++
+			paradoxOccurrences++
 		}
 	}
 
-	return strconv.Itoa(paradoxOccurrence)
+	return strconv.Itoa(paradoxOccurrences)
 }
