@@ -31,6 +31,11 @@ func (p Point) Next(direction Direction) Point {
 	}
 }
 
+type Status struct {
+	Pos Point
+	Dir Direction
+}
+
 func getCurrentPosition(grids []string) Point {
 	for x := 0; x < len(grids); x++ {
 		for y := 0; y < len(grids[x]); y++ {
@@ -43,14 +48,10 @@ func getCurrentPosition(grids []string) Point {
 	return Point{}
 }
 
-func (*PuzzleSolver) Day6Part1(input string) string {
-	grids := strings.Split(input, "\n")
-
+func moveGuard(grids []string) map[Point]bool {
 	point := getCurrentPosition(grids)
 	direction := U
-	visited := map[Point]struct{}{
-		point: {},
-	}
+	visited := map[Point]bool{point: true}
 
 	for {
 		nextPoint := point.Next(direction)
@@ -62,9 +63,59 @@ func (*PuzzleSolver) Day6Part1(input string) string {
 			direction = (direction + 1) % 4
 		} else {
 			point = nextPoint
-			visited[point] = struct{}{}
+			visited[point] = true
 		}
 	}
 
+	return visited
+}
+
+func testParadox(grids []string, obstacle Point) bool {
+	point := getCurrentPosition(grids)
+	direction := U
+	visited := map[Status]bool{
+		{point, direction}: true,
+	}
+
+	for {
+		nextPoint := point.Next(direction)
+		if nextPoint.x < 0 || nextPoint.x >= len(grids) || nextPoint.y < 0 || nextPoint.y >= len(grids[nextPoint.x]) {
+			break
+		}
+
+		if getGridElement(grids, nextPoint.x, nextPoint.y) == rune('#') || nextPoint == obstacle {
+			direction = (direction + 1) % 4
+		} else {
+			point = nextPoint
+		}
+
+		st := Status{point, direction}
+		if _, ok := visited[st]; ok {
+			return true
+		}
+
+		visited[st] = true
+	}
+
+	return false
+}
+
+func (*PuzzleSolver) Day6Part1(input string) string {
+	grids := strings.Split(input, "\n")
+	visited := moveGuard(grids)
 	return strconv.Itoa(len(visited))
+}
+
+func (*PuzzleSolver) Day6Part2(input string) string {
+	grids := strings.Split(input, "\n")
+	visited := moveGuard(grids)
+
+	paradoxOccurrence := 0
+	for visitedPoint := range visited {
+		if testParadox(grids, visitedPoint) {
+			paradoxOccurrence++
+		}
+	}
+
+	return strconv.Itoa(paradoxOccurrence)
 }
